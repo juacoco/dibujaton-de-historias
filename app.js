@@ -33,7 +33,7 @@ const CONFIG = {
 // ✅ IMÁGENES (en /assets)
 // IMPORTANTE: si tus archivos no son .png, cambia la extensión aquí.
 const GUIDE_SRC = "assets/con globo_indicador_2.png";
-const FINAL_BASE_SRC = "assets/mi_san_valentin.png";
+const FINAL_BASE_SRC = "assets/mi_san_valentin_22.png";
 
 const $ = (id) => document.getElementById(id);
 
