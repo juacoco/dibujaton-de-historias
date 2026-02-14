@@ -13,7 +13,6 @@
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
-    /* lo que ya tienes… */
   position: relative;
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -28,10 +27,13 @@ body{
   color:var(--text);
 }
 
-.app{ max-width: 1080px; margin: 0 auto; padding: 18px; 
-      position: relative;
-      z-index: 1;
-    }
+.app{
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 18px;
+  position: relative;
+  z-index: 1;
+}
 
 .topbar{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
@@ -59,7 +61,7 @@ p{ line-height:1.45; margin: 8px 0; }
   background: #fff3e6;               /* crema (opaco) */
   border-radius: 16px;
   padding: 14px;
-  box-shadow: 0 10px 30px rgba(58,47,63,.08);  /* suave, cute */
+  box-shadow: 0 10px 30px rgba(58,47,63,.08);
 }
 
 .primary, .ghost{
@@ -91,7 +93,7 @@ p{ line-height:1.45; margin: 8px 0; }
 
 .input{
   width: 100%;
-  background: #ffffff;               /* blanco sólido */
+  background: #ffffff;
   border: 1px solid #ead2df;
   color: var(--text);
   border-radius: 12px;
@@ -101,14 +103,16 @@ p{ line-height:1.45; margin: 8px 0; }
   box-shadow: 0 8px 18px rgba(58,47,63,.06);
 }
 
-.input::placeholder{
-  color: rgba(58,47,63,.45);
-}
+.input::placeholder{ color: rgba(58,47,63,.45); }
 
 .input:focus{
   border-color: rgba(255,134,183,.85);
   box-shadow: 0 0 0 4px rgba(255,134,183,.18), 0 10px 22px rgba(58,47,63,.07);
-}.input:focus{ border-color: rgba(124,92,255,.7); box-shadow: 0 0 0 3px rgba(124,92,255,.18); }
+}
+.input:focus{
+  border-color: rgba(124,92,255,.7);
+  box-shadow: 0 0 0 3px rgba(124,92,255,.18);
+}
 
 .row{ display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
 .row.between{ justify-content:space-between; }
@@ -126,7 +130,7 @@ p{ line-height:1.45; margin: 8px 0; }
   padding: 10px 10px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: #fffdf8;   /* crema muy clarita */
+  background: #fffdf8;
 }
 .badge{ display:inline-flex; align-items:center; gap: 8px; font-weight: 900; }
 .avatar{
@@ -152,7 +156,10 @@ p{ line-height:1.45; margin: 8px 0; }
   padding: 6px 10px; border-radius: 999px; border:1px solid var(--line);
   background: rgba(255,255,255,.03); font-weight: 900;
 }
-.timer.danger{ border-color: color-mix(in oklab, var(--danger), var(--line) 60%); box-shadow: 0 0 0 3px rgba(255,92,122,.12); }
+.timer.danger{
+  border-color: color-mix(in oklab, var(--danger), var(--line) 60%);
+  box-shadow: 0 0 0 3px rgba(255,92,122,.12);
+}
 .timerLabel{ opacity:.9; }
 .hudCenter{ flex:1; min-width: 260px; }
 .prompt{ font-size: 18px; font-weight: 900; }
@@ -171,11 +178,30 @@ p{ line-height:1.45; margin: 8px 0; }
   background: var(--panel2);
   overflow:hidden;
 }
+
+/* ====== NUEVO: Imagen guía abajo + canvas arriba ====== */
+.stage{
+  position: relative;
+  width: 100%;
+}
+.guideImg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit: fill;
+  pointer-events:none;
+  user-select:none;
+  z-index:0;
+}
 canvas{
   display:block; width: 100%; height: auto;
   touch-action: none;
-  background: #0f1422;
+  background: transparent !important; /* canvas transparente */
+  position: relative;
+  z-index: 1;
 }
+/* ====================================================== */
 
 .miniBar{
   display:flex; justify-content:space-between; align-items:center; gap:10px;
@@ -253,12 +279,10 @@ body::before{
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.18;              /* intensidad del patrón */
+  opacity: 0.18;
   background-repeat: repeat;
   background-size: 220px 220px;
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27220%27%20height%3D%27220%27%20viewBox%3D%270%200%20220%20220%27%3E%3Crect%20width%3D%27220%27%20height%3D%27220%27%20fill%3D%27none%27/%3E%3Cg%20opacity%3D%270.95%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%274%27%3E%3Cpath%20d%3D%27M40%20165%20l45-45%2018%2018-45%2045-22%205z%27%20fill%3D%27%23ffd6e7%27%20stroke%3D%27%23ff86b7%27/%3E%3Cpath%20d%3D%27M84%20120%20l12-12%2018%2018-12%2012z%27%20fill%3D%27%23fff2b8%27%20stroke%3D%27%23ffb84d%27/%3E%3Crect%20x%3D%27135%27%20y%3D%2755%27%20width%3D%2755%27%20height%3D%2775%27%20rx%3D%2710%27%20fill%3D%27%23dff7ff%27%20stroke%3D%27%237fc8ff%27/%3E%3Cpath%20d%3D%27M145%2075%20h35%20M145%2092%20h35%20M145%20109%20h28%27%20stroke%3D%27%237fc8ff%27/%3E%3Cpath%20d%3D%27M68%2058%20c6-10%2018-10%2024%200%20c6%2010-4%2018-12%2024%20c-8-6-18-14-12-24z%27%20fill%3D%27%23e8ddff%27%20stroke%3D%27%23b09cff%27/%3E%3C/g%3E%3C/svg%3E");
   z-index: 0;
 }
-
-/* opcional: que el patrón sea más suave */
 body::before{ mix-blend-mode: multiply; }
