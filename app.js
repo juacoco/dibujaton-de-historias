@@ -1,22 +1,22 @@
 /*
-  Sketch Duel — estático (GitHub Pages)
-  3 rondas + timer + sonidos (WebAudio) + final con 3 dibujos + descarga.
-
-  PERSONALIZA AQUÍ:
+  1 ronda:
+  - Ronda: imagen guía debajo (NO se guarda) + canvas transparente arriba (sí se guarda)
+  - Final: compone mi imagen (mi_san_valentin) + dibujo del usuario y permite descargarlo
 */
+
 const CONFIG = {
   title: "Sketch Duel",
 
-  // Acceso simple por interfaz:
-  // "" = desactivado.
-  // Si pones un texto (ej: "globo2026"), pedirá ese código en el menú.
-  // OJO: no es seguridad real.
+  // "" = desactivado
   accessCode: "",
 
+  // ✅ 1 sola ronda
   rounds: [
-    { prompt: "Ronda 1: Dibuja tu escena 1.", seconds: 45, note: "Tip: usa líneas simples." },
-    { prompt: "Ronda 2: Dibuja tu escena 2.", seconds: 45, note: "Tip: agrega un detalle clave." },
-    { prompt: "Ronda 3: Dibuja tu escena 3.", seconds: 45, note: "Tip: cuida la composición." },
+    {
+      prompt: "Ronda única: dibuja tu mano tomando el globo (usa la guía).",
+      seconds: 60,
+      note: "Tip: ajusta tu mano donde indica la guía.",
+    },
   ],
 
   finalTitle: "Final",
@@ -29,6 +29,11 @@ const CONFIG = {
     drawEveryMs: 160,
   },
 };
+
+// ✅ IMÁGENES (en /assets)
+// IMPORTANTE: si tus archivos no son .png, cambia la extensión aquí.
+const GUIDE_SRC = "assets/con globo_indicador_2.png";
+const FINAL_BASE_SRC = "assets/mi_san_valentin.png";
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,9 +56,9 @@ $("menuTitle").textContent = CONFIG.title;
 $("finalTitle").textContent = CONFIG.finalTitle;
 $("finalText").textContent = CONFIG.finalText;
 $("roundsHint").textContent = String(CONFIG.rounds.length);
-$("timeHint").textContent = (CONFIG.rounds[0]?.seconds ?? 45) + "s";
+$("timeHint").textContent = (CONFIG.rounds[0]?.seconds ?? 60) + "s";
 
-// --- Simple WebAudio beeps (sin archivos externos) ---
+// --- Simple WebAudio beeps ---
 let audioUnlocked = false;
 let audioCtx = null;
 
@@ -123,9 +128,13 @@ let drawing = false;
 let lastX=0, lastY=0;
 let lastDrawSoundAt = 0;
 
-// Store drawings per round
+// 1 ronda => 1 dibujo
 const drawings = Array(CONFIG.rounds.length).fill(null);
 let roundIndex = 0;
+
+// Imagen guía debajo del canvas
+const guideImgEl = $("guideImg");
+if (guideImgEl) guideImgEl.src = GUIDE_SRC;
 
 function resizeCanvasForHiDPI(){
   const dpr = window.devicePixelRatio || 1;
@@ -138,9 +147,10 @@ function resizeCanvasForHiDPI(){
   ctx.setTransform(1,0,0,1,0,0);
   ctx.scale(dpr, dpr);
 
-  ctx.fillStyle = "#0f1422";
-  ctx.fillRect(0,0,cssW,cssH);
+  // ✅ Fondo transparente (no se “pega” a la guía)
+  ctx.clearRect(0,0,cssW,cssH);
 
+  // restaurar dibujo guardado (si existe)
   const dataUrl = drawings[roundIndex];
   if (dataUrl){
     const img = new Image();
@@ -157,8 +167,8 @@ function clearCanvas(){
   ctx.setTransform(1,0,0,1,0,0);
   ctx.scale(dpr, dpr);
 
-  ctx.fillStyle = "#0f1422";
-  ctx.fillRect(0,0,cssW,cssH);
+  // ✅ transparente
+  ctx.clearRect(0,0,cssW,cssH);
 
   drawings[roundIndex] = null;
 }
@@ -190,9 +200,7 @@ function moveDraw(e){
   const p = getPos(e);
   const size = Number($("brushSize").value || 6);
 
-  const from = {x:lastX, y:lastY};
-  stroke(from, p, size);
-
+  stroke({x:lastX, y:lastY}, p, size);
   lastX = p.x; lastY = p.y;
 
   const now = Date.now();
@@ -248,7 +256,7 @@ function stopTimer(){
 
 // --- Flow ---
 function setRoundUI(){
-  const total = CONFIG.rounds.length;
+  const total = CONFIG.rounds.length; // 1
   $("roundPill").textContent = `Ronda ${roundIndex+1}/${total}`;
   $("promptText").textContent = CONFIG.rounds[roundIndex].prompt;
   $("miniNote").textContent = CONFIG.rounds[roundIndex].note || "";
@@ -264,7 +272,7 @@ function startGame(){
   }
 
   roundIndex = 0;
-  for (let i=0;i<drawings.length;i++) drawings[i] = null;
+  drawings[0] = null;
 
   setStatus("Ronda 1");
   setRoundUI();
@@ -275,6 +283,7 @@ function startGame(){
 }
 
 function saveCurrentDrawing(){
+  // ✅ Guarda SOLO el dibujo en PNG con transparencia
   drawings[roundIndex] = canvas.toDataURL("image/png");
 }
 
@@ -283,27 +292,20 @@ function finishRound(auto=false){
 
   showScreen("loading");
   $("loadingTitle").textContent = auto ? "¡Tiempo! Guardando…" : "Guardando…";
-  $("loadingSub").textContent = "Preparando la siguiente ronda…";
+  $("loadingSub").textContent = "Preparando el final…";
 
-  setTimeout(()=> nextRoundOrFinal(), CONFIG.loadingMs);
+  setTimeout(()=> goFinal(), CONFIG.loadingMs);
 }
 
-function nextRoundOrFinal(){
-  if (roundIndex < CONFIG.rounds.length - 1){
-    roundIndex += 1;
-    setStatus(`Ronda ${roundIndex+1}`);
-    setRoundUI();
-    showScreen("play");
-    setTimeout(resizeCanvasForHiDPI, 0);
-    clearCanvas();
-    startTimer(CONFIG.rounds[roundIndex].seconds);
-  } else {
-    setStatus("Final");
-    stopTimer();
-    renderFinal();
-    soundReveal();
-    showScreen("final");
-  }
+async function goFinal(){
+  setStatus("Final");
+  stopTimer();
+
+  const resultPng = await buildFinalComposite(FINAL_BASE_SRC, drawings[0]);
+  await renderFinal(resultPng);
+
+  soundReveal();
+  showScreen("final");
 }
 
 $("btnDone").addEventListener("click", ()=>{ unlockAudio(); stopTimer(); finishRound(false); });
@@ -323,53 +325,96 @@ $("btnPlayAgain").addEventListener("click", ()=>{
   setStatus("Menú");
 });
 
-// --- Final rendering + download story ---
-async function renderFinal(){
+// --- FINAL: mostrar resultado y configurar descarga ---
+async function renderFinal(resultPng){
   const grid = $("storyGrid");
   grid.innerHTML = "";
 
-  for (let i=0;i<CONFIG.rounds.length;i++){
-    const panel = document.createElement("div");
-    panel.className = "storyPanel";
+  const panel = document.createElement("div");
+  panel.className = "storyPanel";
 
-    const img = document.createElement("img");
-    img.alt = `Dibujo ${i+1}`;
-    img.src = drawings[i] || emptyPanelDataUrl(i+1);
+  const img = document.createElement("img");
+  img.alt = "Resultado final";
+  img.src = resultPng || emptyPanelDataUrl("Resultado");
 
-    const title = document.createElement("div");
-    title.className = "panelTitle";
-    title.textContent = `Escena ${i+1}: ${CONFIG.rounds[i].prompt}`;
+  const title = document.createElement("div");
+  title.className = "panelTitle";
+  title.textContent = "Así quedó :)";
 
-    panel.appendChild(img);
-    panel.appendChild(title);
-    grid.appendChild(panel);
-  }
+  panel.appendChild(img);
+  panel.appendChild(title);
+  grid.appendChild(panel);
 
-  const storyPng = await buildStoryImage(drawings, CONFIG.finalText);
-  $("btnDownloadStory").href = storyPng;
+  // Botón descarga
+  const a = $("btnDownloadStory");
+  a.href = resultPng || "#";
+  a.download = "resultado.png";
+  a.textContent = "Descargar resultado";
 }
 
-function emptyPanelDataUrl(n){
+// --- Composición final: base + overlay del usuario ---
+function loadImg(src){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>resolve(img);
+    img.onerror = ()=>resolve(null);
+    img.src = src;
+  });
+}
+
+async function buildFinalComposite(baseSrc, overlaySrc){
+  // Mantengo salida a 1200x720 (proporción 0.6) para que coincida con tu guía si está igual
+  const outW = 1200;
+  const outH = Math.round(outW * 0.6);
+
   const c = document.createElement("canvas");
-  c.width = 1200; c.height = 750;
+  c.width = outW;
+  c.height = outH;
+  const g = c.getContext("2d");
+
+  // base (tu dibujo)
+  const base = await loadImg(baseSrc);
+  if (base){
+    g.drawImage(base, 0, 0, outW, outH);
+  } else {
+    g.fillStyle = "#0b0e14";
+    g.fillRect(0,0,outW,outH);
+  }
+
+  // overlay (dibujo del usuario, transparente)
+  if (overlaySrc){
+    const overlay = await loadImg(overlaySrc);
+    if (overlay){
+      g.drawImage(overlay, 0, 0, outW, outH);
+    }
+  }
+
+  return c.toDataURL("image/png");
+}
+
+function emptyPanelDataUrl(label){
+  const w = 1200;
+  const h = Math.round(w * 0.6);
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
   const g = c.getContext("2d");
 
   g.fillStyle = "#0f1422";
-  g.fillRect(0,0,c.width,c.height);
+  g.fillRect(0,0,w,h);
 
   g.strokeStyle = "rgba(124,92,255,.7)";
   g.lineWidth = 8;
-  roundRect(g, 60, 60, c.width-120, c.height-120, 28);
+  roundRect(g, 60, 60, w-120, h-120, 28);
   g.stroke();
 
   g.fillStyle = "#e9ecf2";
   g.textAlign = "center";
   g.font = "800 54px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  g.fillText(`Escena ${n}`, c.width/2, c.height/2 - 10);
+  g.fillText(label, w/2, h/2 - 10);
 
   g.fillStyle = "rgba(170,179,197,1)";
   g.font = "500 24px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  g.fillText("No se guardó dibujo", c.width/2, c.height/2 + 38);
+  g.fillText("No se pudo generar imagen", w/2, h/2 + 38);
 
   return c.toDataURL("image/png");
 }
@@ -383,47 +428,6 @@ function roundRect(ctx, x, y, w, h, r){
   ctx.arcTo(x, y+h, x, y, rr);
   ctx.arcTo(x, y, x+w, y, rr);
   ctx.closePath();
-}
-
-function loadImg(dataUrl){
-  return new Promise((resolve)=>{
-    const img = new Image();
-    img.onload = ()=>resolve(img);
-    img.onerror = ()=>resolve(null);
-    img.src = dataUrl;
-  });
-}
-
-async function buildStoryImage(draws, askText){
-  const w = 1200;
-  const hPanel = 750;
-  const gap = 18;
-  const top = 24;
-  const bottom = 120;
-  const totalH = top + draws.length*hPanel + (draws.length-1)*gap + bottom;
-
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = totalH;
-  const g = c.getContext("2d");
-
-  g.fillStyle = "#0b0e14";
-  g.fillRect(0,0,w,totalH);
-
-  let y = top;
-  for (let i=0;i<draws.length;i++){
-    const url = draws[i] || emptyPanelDataUrl(i+1);
-    const img = await loadImg(url);
-    if (img) g.drawImage(img, 0, y, w, hPanel);
-    y += hPanel + gap;
-  }
-
-  g.fillStyle = "#e9ecf2";
-  g.textAlign = "center";
-  g.font = "800 54px system-ui, -apple-system, Segoe UI, Roboto, Arial";
-  g.fillText(askText, w/2, totalH - 52);
-
-  return c.toDataURL("image/png");
 }
 
 // Resize
