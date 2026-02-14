@@ -50,10 +50,11 @@ p{ line-height:1.45; margin: 8px 0; }
 .tiny{ font-size: 12px; }
 
 .card{
-  border:1px solid var(--line);
-  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border: 1px solid var(--line);
+  background: #fff3e6;               /* crema (opaco) */
   border-radius: 16px;
   padding: 14px;
+  box-shadow: 0 10px 30px rgba(58,47,63,.08);  /* suave, cute */
 }
 
 .primary, .ghost{
@@ -85,15 +86,24 @@ p{ line-height:1.45; margin: 8px 0; }
 
 .input{
   width: 100%;
-  background: rgba(15,20,34,.7);
-  border: 1px solid var(--line);
+  background: #ffffff;               /* blanco sólido */
+  border: 1px solid #ead2df;
   color: var(--text);
   border-radius: 12px;
   padding: 12px 12px;
   font-size: 15px;
   outline: none;
+  box-shadow: 0 8px 18px rgba(58,47,63,.06);
 }
-.input:focus{ border-color: rgba(124,92,255,.7); box-shadow: 0 0 0 3px rgba(124,92,255,.18); }
+
+.input::placeholder{
+  color: rgba(58,47,63,.45);
+}
+
+.input:focus{
+  border-color: rgba(255,134,183,.85);
+  box-shadow: 0 0 0 4px rgba(255,134,183,.18), 0 10px 22px rgba(58,47,63,.07);
+}.input:focus{ border-color: rgba(124,92,255,.7); box-shadow: 0 0 0 3px rgba(124,92,255,.18); }
 
 .row{ display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
 .row.between{ justify-content:space-between; }
@@ -111,7 +121,7 @@ p{ line-height:1.45; margin: 8px 0; }
   padding: 10px 10px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: rgba(255,255,255,.03);
+  background: #fffdf8;   /* crema muy clarita */
 }
 .badge{ display:inline-flex; align-items:center; gap: 8px; font-weight: 900; }
 .avatar{
