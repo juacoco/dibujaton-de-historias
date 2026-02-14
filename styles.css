@@ -13,6 +13,8 @@
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
+    /* lo que ya tienes… */
+  position: relative;
   margin:0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
@@ -26,7 +28,10 @@ body{
   color:var(--text);
 }
 
-.app{ max-width: 1080px; margin: 0 auto; padding: 18px; }
+.app{ max-width: 1080px; margin: 0 auto; padding: 18px; 
+      position: relative;
+      z-index: 1;
+    }
 
 .topbar{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
@@ -252,6 +257,7 @@ body::before{
   background-repeat: repeat;
   background-size: 220px 220px;
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27220%27%20height%3D%27220%27%20viewBox%3D%270%200%20220%20220%27%3E%3Crect%20width%3D%27220%27%20height%3D%27220%27%20fill%3D%27none%27/%3E%3Cg%20opacity%3D%270.95%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20stroke-width%3D%274%27%3E%3Cpath%20d%3D%27M40%20165%20l45-45%2018%2018-45%2045-22%205z%27%20fill%3D%27%23ffd6e7%27%20stroke%3D%27%23ff86b7%27/%3E%3Cpath%20d%3D%27M84%20120%20l12-12%2018%2018-12%2012z%27%20fill%3D%27%23fff2b8%27%20stroke%3D%27%23ffb84d%27/%3E%3Crect%20x%3D%27135%27%20y%3D%2755%27%20width%3D%2755%27%20height%3D%2775%27%20rx%3D%2710%27%20fill%3D%27%23dff7ff%27%20stroke%3D%27%237fc8ff%27/%3E%3Cpath%20d%3D%27M145%2075%20h35%20M145%2092%20h35%20M145%20109%20h28%27%20stroke%3D%27%237fc8ff%27/%3E%3Cpath%20d%3D%27M68%2058%20c6-10%2018-10%2024%200%20c6%2010-4%2018-12%2024%20c-8-6-18-14-12-24z%27%20fill%3D%27%23e8ddff%27%20stroke%3D%27%23b09cff%27/%3E%3C/g%3E%3C/svg%3E");
+  z-index: 0;
 }
 
 /* opcional: que el patrón sea más suave */
