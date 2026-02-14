@@ -181,7 +181,7 @@ function getPos(e){
 function stroke(from, to, size){
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.strokeStyle = "#e9ecf2";
+  ctx.strokeStyle = "#000000"; // negro
   ctx.lineWidth = size;
 
   ctx.beginPath();
